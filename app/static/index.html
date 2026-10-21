@@ -13,6 +13,7 @@
   <title>弈墨 · 画之灵助手</title>
   <script src="/static/app.js" defer></script>
   <script src="/static/reference.js" defer></script>
+  <script src="/static/coach.js" defer></script>
 </head>
 <body>
   <header class="header">
@@ -24,7 +25,7 @@
       <button class="nav-button" data-view="items"><span>◇</span> 装备工坊</button>
       <button class="nav-button" data-action="reference-more"><span>▤</span> 更多资料</button>
     </nav>
-    <span class="header-status"><i></i> 官网资料快照</span>
+    <button class="outline-button" data-action="ask-coach" data-kind="general">✧ AI 教练</button><span class="header-status"><i></i> 官网资料快照</span>
   </header>
 
   <main id="main-content">
@@ -112,6 +113,16 @@
   </main>
   <footer class="footer"><span>弈墨 <b>·</b> 落子成画</span><span>基于官网公开资料制作的独立工具</span></footer>
   <dialog id="modal" aria-labelledby="modal-title"><div class="dialog-header"><h2 id="modal-title"></h2><button class="icon-button" data-action="close-modal" aria-label="关闭弹窗">×</button></div><div id="modal-body"></div></dialog>
+  <dialog id="coach-dialog" aria-labelledby="coach-title">
+    <div class="dialog-header"><div><h2 id="coach-title">AI 学习教练</h2><small id="coach-context"></small></div><button id="coach-close" class="icon-button" aria-label="关闭 AI 教练">×</button></div>
+    <p class="data-caption">围绕当前资料提问。发送时，问题、近期对话与相关游戏资料会交给已配置的 AI 服务分析。</p>
+    <div id="coach-prompts" class="feature-filters"></div>
+    <div id="coach-messages" aria-live="polite"></div>
+    <form id="coach-form"><label for="coach-question">想了解什么？</label><textarea id="coach-question" rows="3" maxlength="1500" required placeholder="例如：这件装备给谁更合适，为什么？"></textarea>
+      <label id="coach-access-field" hidden>AI 访问口令<input id="coach-access" type="password" autocomplete="off"></label>
+      <p id="coach-status" role="status" class="data-caption"></p><button id="coach-submit" class="primary" type="submit" disabled>发送问题 ↗</button>
+    </form>
+  </dialog>
   <div id="toast" class="toast" role="status" hidden></div>
 </body>
 </html>

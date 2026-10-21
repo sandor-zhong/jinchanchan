@@ -5,6 +5,11 @@ services:
       - "${APP_PORT:-8000}:8000"
     environment:
       PORT: "8000"
+      AI_API_KEY: "${AI_API_KEY:-}"
+      AI_API_STYLE: "${AI_API_STYLE:-responses}"
+      AI_MODEL: "${AI_MODEL:-}"
+      AI_BASE_URL: "${AI_BASE_URL:-https://api.openai.com/v1}"
+      AI_ACCESS_TOKEN: "${AI_ACCESS_TOKEN:-}"
       WEB_CONCURRENCY: "${WEB_CONCURRENCY:-2}"
       CORS_ORIGINS: "${CORS_ORIGINS:-}"
     restart: unless-stopped

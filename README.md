@@ -201,3 +201,31 @@ compose.production.yml      Caddy HTTPS 部署
 ```
 
 收藏和条件保存在当前设备浏览器，不跨设备同步。项目无数据库、无管理写接口；若以后增加用户账号或可写功能，再引入数据库和身份认证即可。
+
+
+## AI 学习教练
+
+首页和棋子、装备、阵容详情均提供「AI 教练」入口。提问自动附上当前对象、棋子星级和相关官网资料；支持连续追问、查看本次检索的资料卡片。回答仅基于本地赛季快照，无实时联网检索、截图识别或战斗模拟。
+
+在项目根目录创建 `.env`（可从 `.env.example` 复制，不要覆盖已有配置），填写：
+
+```dotenv
+AI_API_KEY=你的服务商密钥
+AI_MODEL=你的账户可用模型ID
+AI_BASE_URL=https://你的服务商地址/v1
+AI_API_STYLE=chat_completions
+AI_ACCESS_TOKEN=自行设置英文数字访问口令
+```
+
+其他服务商须提供兼容 Chat Completions 的接口，基础地址按其文档填写，不含 `/chat/completions`；程序使用 `messages`、`max_tokens` 和非流式返回。OpenAI 或支持 Responses 的服务可设置 `AI_API_STYLE=responses`，OpenAI 基础地址为 `https://api.openai.com/v1`。模型 ID 必须由你的服务商账户提供，项目不默认指定模型。协议分别参照 [OpenAI 文本生成文档](https://developers.openai.com/api/docs/guides/text) 和 [Chat Completions 文档](https://developers.openai.com/api/reference/resources/chat/subresources/completions/methods/create)，第三方兼容程度须实际测试。
+
+本地启动：`.venv\Scripts\python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8000`，应用自动读取根目录 `.env`；更改配置后需重启。Docker Compose 已透传这些环境变量，更改后运行 `docker compose up -d --build`（生产部署使用对应 compose 文件）。
+
+未配置密钥或模型时，AI 面板显示配置提示，其他功能照常使用。`GET /api/v1/ai/status` 仅返回是否配置，不测试上游连通性、不返回密钥。`POST /api/v1/ai/ask` 接收问题、页面种类/ID、星级及最多8条历史消息；访问口令通过 `X-AI-Access-Token` 传递。密钥仅由服务端读取，不会进入浏览器；访问口令不会保存到浏览器存储。问题、近期对话与相关资料会发送至你配置的服务商，服务商可能按其规则计费和保存数据；Responses 模式请求设置 `store=false`，第三方数据保留规则以其条款为准。
+
+当前限制为每进程每分钟20次请求、3个并发，适用于个人使用；多 worker 会各自计数。公网使用请设置访问口令，服务商费用上限在服务商控制台设置。测试覆盖两种协议、资料关联、错误与超时处理、访问控制，不使用真实密钥或产生模型调用费用。
+
+
+### DeepSeek 配置
+
+本项目当前本地配置为 `AI_BASE_URL=https://api.deepseek.com`、`AI_MODEL=deepseek-flash`、`AI_API_STYLE=chat_completions`；只需在 `.env` 填入 `AI_API_KEY` 后重启。对应请求路径为 `/chat/completions`。为了快速完成页面问答，直连 DeepSeek 时请求显式使用 `thinking.type=disabled`，避免有限输出额度被思考过程占用。参数和返回格式参照 [DeepSeek 官方接口文档](https://api-docs.deepseek.com/api/create-chat-completion/)。此配置不包含密钥，也不表示已经完成真实连通性验证。

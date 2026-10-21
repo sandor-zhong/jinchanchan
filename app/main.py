@@ -14,6 +14,10 @@ from app.catalog import ROOT, canonical_hero_ids, get_catalog, index
 from app.recommend import RecommendRequest, rank_lineups
 from app.reference import get_reference
 from app.statistics import rankings
+from app.ai import router as ai_router
+from dotenv import load_dotenv
+
+load_dotenv(ROOT / '.env', override=False)
 
 
 @asynccontextmanager
@@ -25,9 +29,10 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="画之灵助手 API", version="2.0.0", lifespan=lifespan,
               description="基于官网资料的阵容学习手册、棋子属性与出装、强化符文双向查询及可选条件匹配。")
 app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.include_router(ai_router)
 origins = [x.strip() for x in os.getenv("CORS_ORIGINS", "").split(",") if x.strip()]
 if origins:
-    app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST"], allow_headers=["Content-Type"])
+    app.add_middleware(CORSMiddleware, allow_origins=origins, allow_methods=["GET", "POST"], allow_headers=["Content-Type", "X-AI-Access-Token"])
 
 
 @app.middleware("http")

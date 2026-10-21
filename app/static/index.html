@@ -83,8 +83,8 @@
 
     <section id="view-heroes" class="view" hidden>
       <div class="section-heading"><div><span class="eyebrow">CHAMPION STUDY</span><h2>逐个了解，每个弈子</h2><p class="muted">固定详情区域，快速切换；同星级看属性、技能与出装逻辑。</p></div><button class="outline-button" data-action="toggle-hero-table">属性总表 ⇄</button></div>
-      <div class="filter-bar"><input id="hero-search" type="search" placeholder="搜索英雄或羁绊，如：巴德、山海" aria-label="搜索英雄或羁绊"><select id="hero-cost" aria-label="按费用筛选"><option value="">全部费用</option><option value="1">1 费</option><option value="2">2 费</option><option value="3">3 费</option><option value="4">4 费</option><option value="5">5 费</option><option value="0">召唤物</option></select><select id="hero-trait" aria-label="按羁绊筛选"><option value="">全部羁绊</option></select><select id="study-star" aria-label="图鉴统一星级"><option value="1">1 星</option><option value="2">2 星</option><option value="3">3 星</option></select></div>
-      <div id="hero-study-layout" class="hero-study-layout"><aside class="hero-index"><div class="index-heading"><span id="hero-list-count"></span><small>可用 ← → 切换</small></div><div id="hero-list" role="listbox" aria-label="棋子快速切换列表"></div></aside><article id="hero-detail" class="hero-study-detail" aria-live="polite"></article></div>
+      <div class="filter-bar"><input id="hero-search" type="search" placeholder="搜索英雄或羁绊，如：巴德、山海" aria-label="搜索英雄或羁绊"><select id="hero-cost" aria-label="按费用筛选"><option value="">全部费用</option><option value="1">1 费</option><option value="2">2 费</option><option value="3">3 费</option><option value="4">4 费</option><option value="5">5 费</option><option value="0">召唤物</option></select><select id="hero-trait" aria-label="按羁绊筛选"><option value="">全部羁绊</option></select><select id="hero-feature" aria-label="按棋子特性筛选"><option value="">全部特性</option></select><select id="study-star" aria-label="图鉴统一星级"><option value="1">1 星</option><option value="2">2 星</option><option value="3">3 星</option></select></div>
+      <div id="hero-study-layout" class="hero-study-layout"><aside class="hero-index"><div class="index-heading"><span id="hero-list-count"></span><small>左右滑动 / ← → 切换</small></div><div id="hero-list" role="listbox" aria-label="棋子快速切换列表"></div></aside><article id="hero-detail" class="hero-study-detail" aria-live="polite"></article></div>
       <div id="hero-table-panel" class="attribute-table-wrap" hidden></div>
     </section>
 
@@ -100,9 +100,9 @@
     </section>
 
     <section id="view-items" class="view" hidden>
-      <div class="section-heading"><div><span class="eyebrow">ITEM WORKSHOP</span><h2>好器，成就好棋</h2><p class="muted">查看合成路径与装备效果，也可筛选现有散件能合成的装备。</p></div></div>
+      <div class="section-heading"><div><span class="eyebrow">ITEM WORKSHOP</span><h2>好器，成就好棋</h2><p class="muted">按功能找装备，查看完整效果、合成路径与适配棋子，左右滑动快速切换。</p></div></div>
       <div class="filter-bar"><input id="item-search" type="search" placeholder="搜索装备或效果，如：羊刀、护盾" aria-label="搜索装备"><select id="item-type" aria-label="装备类别"><option value="">全部可见装备</option></select><label class="check-label"><input id="craftable-only" type="checkbox">仅看已有散件可合成</label></div>
-      <div id="item-grid" class="item-grid"></div>
+      <div id="item-tags" class="feature-filters" aria-label="装备功能标签"></div><p id="item-count" class="list-count" aria-live="polite"></p><div id="item-grid" class="item-grid"></div>
     </section>
 
     <section id="view-sources" class="view" hidden>

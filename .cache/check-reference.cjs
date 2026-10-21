@@ -1,0 +1,9 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');const nodes=new Map();const el=id=>{if(!nodes.has(id))nodes.set(id,{value:'',checked:false,innerHTML:'',textContent:'',addEventListener(){},classList:{toggle(){}},scrollIntoView(){},scrollTop:0});return nodes.get(id)};
+const ctx=vm.createContext({console,Set,Map,URL,AbortSignal,setTimeout,clearTimeout,localStorage:{getItem(){return null}},document:{querySelector:el,querySelectorAll:()=>[],addEventListener(){}},window:{addEventListener(){}},matchMedia:()=>({matches:false})});
+vm.runInContext(fs.readFileSync('app/static/app.js','utf8').replace(/\ninit\(\);\s*$/,''),ctx);vm.runInContext(fs.readFileSync('app/static/reference.js','utf8'),ctx);
+ctx.data=JSON.parse(fs.readFileSync('data/catalog.json','utf8'));ctx.ref=JSON.parse(fs.readFileSync('.cache/reference-check.json','utf8'));
+vm.runInContext(`state.data=data;state.meta=data;state.reference=ref;for(const k of ['heroes','items','traits','augments'])state.maps[k]=Object.fromEntries(data[k].map(x=>[x.id,x]));openDialog=(title,body)=>{document.querySelector('#modal-body').innerHTML=body};initReference();renderItems();`,ctx);
+assert(el('#item-grid').innerHTML.includes('适配棋子'));
+vm.runInContext(`state.itemTags.add('攻速');state.itemTags.add('暴击');renderItems();if(!itemRows().every(i=>itemFeatures(i).includes('攻速')&&itemFeatures(i).includes('暴击')))throw Error('intersection');for(const i of data.items.filter(i=>i.type!=='-1'))showItem(i.id);for(const h of data.heroes){document.querySelector('#hero-feature').value=heroFeatures(h)[0];if(!heroRows().includes(h))throw Error('hero feature');}document.querySelector('#hero-feature').value='';state.studyStar=3;renderHeroes();`,ctx);
+console.log('PASS: all visible equipment details, tag intersection, all hero features, star rendering');
+

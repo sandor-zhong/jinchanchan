@@ -133,17 +133,13 @@ function toggleFavorite(id) {
   storage.set('yimo-favorites',[...state.favorites]); renderResults();
   if ($('#modal').open && state.lastLineup===id) showLineup(id);
 }
+const aliases={'羊刀':'鬼索','青龙刀':'朔极','无尽':'无尽之刃','法爆':'珠光护手','饮血':'饮血剑','水银':'水银','轻语':'最后的轻语','大天使':'大天使之杖','帽子':'灭世者','狂徒':'狂徒铠甲','反甲':'棘刺背心','龙牙':'巨龙之爪'};
 function itemMatches(item,q) { const translated=aliases[q.toLowerCase()]||q; return !q || item.name.includes(translated) || item.description.includes(translated); }
 function canCraft(item) {
   const counts=state.components.reduce((a,id)=>(a[id]=(a[id]||0)+1,a),{});
   return item.components.length>0 && item.components.every(id=>{counts[id]=(counts[id]||0)-1;return counts[id]>=0;});
 }
 function recipe(item) { return item.components.length ? item.components.map(itemIcon).join('<span>＋</span>') : `<span>${esc(item.type==='基础装备'?'基础装备':'无法通过常规散件合成')}</span>`; }
-function renderItems() {
-  const q=$('#item-search').value.trim(), type=$('#item-type').value, craftable=$('#craftable-only').checked;
-  const rows=state.data.items.filter(i=>i.type!=='-1' && itemMatches(i,q) && (!type||i.type===type) && (!craftable||canCraft(i)));
-  $('#item-grid').innerHTML=rows.length ? rows.map(i=>`<button class="item-card" data-action="item" data-id="${i.id}"><div class="item-card-header"><img src="${esc(i.icon)}" alt=""><div><h3>${esc(i.name)}</h3><span class="tag">${esc(i.type)}</span></div></div><p>${esc(i.description||i.stats).slice(0,125)}${(i.description||i.stats).length>125?'…':''}</p><div class="recipe">${recipe(i)}</div></button>`).join('') : '<div class="empty-state">没有符合条件的装备。可先在「阵容推荐」中添加散件。</div>';
-}
 function showPicker(kind) {
   state.picker={kind,q:'',tier:''};
   const titles={augments:'选择强化符文',heroes:'添加当前来牌',owned:'添加已有成装 / 纹章',contested:'标记同行主 C'};
@@ -179,11 +175,6 @@ function pickEntry(id) {
     else if(state.contested.length<20) state.contested.push(id); else return toast('最多标记 20 位同行英雄。');
   }
   renderPicker(); renderSelections(); saveConditions();
-}
-function showItem(id) {
-  const item=state.maps.items[id]; if(!item) return;
-  const heroIds=[...new Set(state.data.lineups.flatMap(l=>l.units.filter(u=>u.item_ids.includes(id)).map(u=>u.hero_id)))];
-  openDialog(item.name,`<div class="item-card-header"><img src="${esc(item.icon)}" alt="${esc(item.name)}"><div><h3>${esc(item.name)}</h3><span class="tag">${esc(item.type)}</span></div></div><div class="detail-section"><h3>属性与效果</h3><p>${esc(item.stats)}</p><p>${esc(item.description)}</p></div><div class="detail-section"><h3>合成路径</h3><div class="core-build">${recipe(item)}</div>${item.components.length?`<p>${item.components.map(c=>esc(state.maps.items[c]?.name||c)).join(' ＋ ')} = ${esc(item.name)}</p>`:''}</div><div class="detail-section"><h3>官网阵容中的使用者</h3><div class="trait-list">${heroIds.length?heroIds.map(h=>`<button class="trait-button" data-action="hero" data-id="${h}">${esc(state.maps.heroes[h].name)}</button>`).join(''):'<p>当前阵容库尚无使用记录。装备效果本身来自官网资料。</p>'}</div></div><button class="primary" data-action="add-from-detail" data-id="${id}">添加到${item.type==='基础装备'?'已有散件':'已有成装'}</button><br><a class="source-link" href="${esc(state.data.sources.find(s=>s.id===item.source_id).url)}" target="_blank" rel="noopener">查看官网装备资料源 ↗</a>`);
 }
 function showTrait(id) {
   const t=state.maps.traits[id];

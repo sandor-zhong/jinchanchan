@@ -1,4 +1,4 @@
-const CACHE = 'yimo-shell-v4';
+const CACHE = 'yimo-shell-v5';
 const SHELL = ['/', '/static/styles.css', '/static/reference.css', '/static/app.js', '/static/reference.js', '/static/icon.svg', '/static/manifest.webmanifest', '/api/v1/catalog', '/api/v1/meta', '/api/v1/guidebook'];
 self.addEventListener('install', event => { event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL.map(url => new Request(url, {cache:'reload'})))).then(() => self.skipWaiting())); });
 self.addEventListener('activate', event => { event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith('yimo-') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });

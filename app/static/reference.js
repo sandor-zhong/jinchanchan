@@ -7,6 +7,7 @@ state.augmentLimit = 36;
 state.lineupTab = 'overview';
 
 function initReference() {
+  $('#hero-feature').innerHTML+= [...new Set(state.data.heroes.flatMap(heroFeatures))].map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');
   const augmentOptions=state.data.augments.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join('');
   $('#book-augment').innerHTML='<option value="">按海克斯查阵容</option>'+augmentOptions;
   $('#augment-lineup').innerHTML='<option value="">按阵容查海克斯</option>'+state.data.lineups.map(l=>`<option value="${l.id}">${esc(l.name)}</option>`).join('');
@@ -28,9 +29,13 @@ function renderHandbook() {
     return `<article class="book-card"><div class="book-card-top"><button data-action="lineup" data-id="${l.id}" class="book-title"><h3>${esc(l.name)}</h3><span>${esc(p.style_label)} · 学习负担${esc(p.difficulty)}</span></button><button class="icon-button favorite ${state.favorites.has(l.id)?'saved':''}" data-action="favorite" data-id="${l.id}" aria-label="收藏${esc(l.name)}">${state.favorites.has(l.id)?'★':'☆'}</button></div><div class="card-tags">${tags(l.traits.slice(0,3))}${p.prerequisites.length?'<span class="tag warning">有前置条件</span>':''}${match?relationBadge(match):''}</div><p class="book-win">${esc(p.win_condition)}</p><div class="book-levels"><span>常见搜牌窗口 <b>${p.roll_level} 人口</b></span><span>最终参考 <b>${p.final_level} 人口</b></span></div><div class="roster">${l.units.map(u=>{const hero=state.maps.heroes[u.hero_id];return `<div class="unit-tile ${u.carry?'carry':''}"><button data-action="hero" data-id="${hero.id}" aria-label="学习${esc(hero.name)}">${portrait(hero)}</button><small>${esc(hero.name)}</small></div>`;}).join('')}</div><div class="book-runes"><span>官网优选</span>${l.augment_ids.map(id=>`<button class="rune-pill" data-action="augment-detail" data-id="${id}">${esc(state.maps.augments[id].name)}</button>`).join('')}</div><div class="card-bottom"><small class="muted">${esc(l.author)}</small><button class="details-button" data-action="lineup" data-id="${l.id}">适用条件 · 运营 · 出装 ↗</button></div></article>`;
   }).join('')||'<div class="empty-state">没有匹配的阵容。试试其他名字或移除筛选。</div>';
 }
+function heroFeatures(h) {
+  const r=state.reference.heroes[h.id];
+  return [r.role,...r.damage_type.split(' / '),...r.utility_tags];
+}
 function heroRows() {
-  const q=$('#hero-search').value.trim(), cost=$('#hero-cost').value, trait=$('#hero-trait').value;
-  return state.data.heroes.filter(h=>(!q||h.name.includes(q)||h.traits.some(t=>t.name.includes(q)))&&(cost===''||h.cost===Number(cost))&&(!trait||h.traits.some(t=>t.id===trait)));
+  const q=$('#hero-search').value.trim(), cost=$('#hero-cost').value, trait=$('#hero-trait').value, feature=$('#hero-feature').value;
+  return state.data.heroes.filter(h=>(!q||h.name.includes(q)||h.traits.some(t=>t.name.includes(q)))&&(cost===''||h.cost===Number(cost))&&(!trait||h.traits.some(t=>t.id===trait))&&(!feature||heroFeatures(h).includes(feature)));
 }
 function starData(hero, star=state.studyStar) { return hero.stars.find(s=>s.star===Number(star))||hero.stars[0]||{star:1,hp:hero.stats.hp,attack:hero.stats.attack,skill:hero.skill_description}; }
 function heroStats(hero) {
@@ -62,7 +67,7 @@ function showHero(id,star) {
   if(!state.maps.heroes[id]) return toast('没有找到这条棋子资料。');
   if($('#modal').open) $('#modal').close();
   if(star) { state.studyStar=Number(star);$('#study-star').value=star; }
-  if(!heroRows().some(h=>h.id===id)) {$('#hero-search').value='';$('#hero-cost').value='';$('#hero-trait').value='';}
+  if(!heroRows().some(h=>h.id===id)) {$('#hero-feature').value='';$('#hero-search').value='';$('#hero-cost').value='';$('#hero-trait').value='';}
   state.heroId=id;state.heroTable=false;showView('heroes',false);selectStudyHero(id);
 }
 function stepHero(direction) {
@@ -163,6 +168,7 @@ document.addEventListener('change',event=>{
   const id=event.target.id;
   if(['book-style','book-augment'].includes(id)) renderHandbook();
   if(['augment-tier-filter','augment-category','augment-lineup'].includes(id)) renderAugments(true);
+  if(id==='hero-feature') renderHeroes();
   if(id==='study-star') {state.studyStar=Number(event.target.value);renderHeroes();}
   if(id==='hero-quick-select') selectStudyHero(event.target.value);
   if(event.target.classList.contains('compare-select')) {const ids=[...state.comparedHeroes];ids[Number(event.target.dataset.slot)]=event.target.value;showHeroComparison(ids);}
@@ -172,3 +178,27 @@ document.addEventListener('keydown',event=>{
   if($('#view-heroes').hidden||$('#modal').open||event.target.closest('input,select,textarea')||state.heroTable) return;
   if(event.key==='ArrowLeft'||event.key==='ArrowRight') {event.preventDefault();stepHero(event.key==='ArrowLeft'?-1:1);}
 });
+
+const itemTagRules=[['攻速',['攻击速度','攻速','每次攻击']],['物理输出',['攻击力','物理伤害']],['法术输出',['法术强度','魔法伤害']],['法力回复',['法力']],['暴击',['暴击']],['生命',['生命值','生命上限']],['护甲',['护甲']],['魔抗',['魔抗','魔法抗性']],['护盾',['护盾']],['治疗续航',['治疗','全能吸血','全能汲取','回复生命','恢复生命']],['减抗',['击碎','护甲削减','魔抗削减']],['重伤',['重伤']],['控制',['晕眩','眩晕','击飞']],['伤害减免',['伤害减免','减伤']],['团队增益',['邻格','友军','友方']],['转职',['纹章']]];
+state.itemTags=new Set();
+function itemFeatures(i){const text=i.name+' '+i.stats+' '+i.description;const labels=itemTagRules.filter(([,words])=>words.some(w=>text.includes(w))).map(([label])=>label);return labels.length?labels:['特殊机制'];}
+function itemRows(){const q=$('#item-search').value.trim(),type=$('#item-type').value;return state.data.items.filter(i=>i.type!=='-1'&&itemMatches(i,q)&&(!type||i.type===type)&&(!$('#craftable-only').checked||canCraft(i))&&[...state.itemTags].every(t=>itemFeatures(i).includes(t)));}
+function renderItems(){
+ const rows=itemRows();state.itemFiltered=rows.map(i=>i.id);
+ const labels=[...new Set(state.data.items.filter(i=>i.type!=='-1').flatMap(itemFeatures))];
+ $('#item-tags').innerHTML='<span class="muted">功能 · 多选交集</span>'+labels.map(t=>`<button class="filter-chip" data-action="item-tag" data-tag="${esc(t)}" aria-pressed="${state.itemTags.has(t)}">${esc(t)}</button>`).join('')+'<button class="text-button" data-action="clear-item-filters">重置筛选</button>';
+ $('#item-count').textContent=rows.length+' 件装备 · 点击查看效果与适配棋子 · 标签按描述归纳';
+ $('#item-grid').innerHTML=rows.map(i=>`<button class="item-card" data-action="item" data-id="${i.id}"><div class="item-card-header"><img src="${esc(i.icon)}" alt=""><div><h3>${esc(i.name)}</h3><span class="tag">${esc(i.type)}</span></div></div><div class="card-tags">${itemFeatures(i).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div><p>${esc(i.stats)}</p><p>${esc(i.description).slice(0,100)}${i.description.length>100?'…':''}</p><div class="recipe">${recipe(i)}</div><span class="item-card-foot">效果 · 合成 · 适配棋子 ↗</span></button>`).join('')||'<div class="empty-state">没有匹配的装备，试试减少标签或重置筛选。</div>';
+}
+function showItem(id){
+ const i=state.maps.items[id];if(!i)return;state.itemId=id;
+ const ids=state.itemFiltered?.includes(id)?state.itemFiltered:state.data.items.filter(x=>x.type!=='-1').map(x=>x.id);state.itemBrowse=ids;
+ const matches=state.data.heroes.filter(h=>!h.form&&!h.summon).map(h=>({h,builds:state.reference.heroes[h.id].builds.filter(b=>b.item_ids.includes(id))})).filter(x=>x.builds.length).sort((a,b)=>b.builds.length-a.builds.length);
+ openDialog(i.name,`<div id="item-study"><div class="study-nav"><button class="outline-button" data-action="item-step" data-direction="-1">← 上一件</button><span>${ids.indexOf(id)+1} / ${ids.length}</span><button class="outline-button" data-action="item-step" data-direction="1">下一件 →</button></div><div class="item-card-header"><img src="${esc(i.icon)}" alt=""><div><h3>${esc(i.name)}</h3><span class="tag">${esc(i.type)}</span></div></div><div class="card-tags">${itemFeatures(i).map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div><section class="study-section"><h3>属性与完整效果</h3><p>${esc(i.stats)}</p><p class="skill-text">${esc(i.description||'属性见上方说明。')}</p></section><section class="study-section"><h3>合成路径</h3><div class="recipe">${recipe(i)}</div><p>${i.components.map(c=>esc(state.maps.items[c]?.name||c)).join(' ＋ ')}</p></section><section class="study-section"><h3>适配棋子 · 官网出装参考</h3><p class="data-caption">以下棋子在官网阵容中使用此装备，点击阵容核对搭配与前置条件。排序按收录组合数，不代表最优或胜率。</p>${matches.map(({h,builds})=>`<div class="equipment-explanation"><button class="equipment-name" data-action="hero" data-id="${h.id}">${portrait(h)}${esc(h.name)} · ${esc(state.reference.heroes[h.id].role)} ↗</button><div class="trait-list">${builds.map(b=>`<button class="trait-button" data-action="lineup" data-id="${b.lineup_id}">${esc(b.lineup_name)} ↗</button>`).join('')}</div></div>`).join('')||'<p>当前官网阵容未收录此装备的适配组合，可结合效果与棋子技能判断。</p>'}</section>${i.type==='基础装备'?`<section class="study-section"><h3>可以合成</h3><div class="trait-list">${state.data.items.filter(x=>x.type!=='-1'&&x.components.includes(id)).map(x=>`<button class="trait-button" data-action="item" data-id="${x.id}">${esc(x.name)} ↗</button>`).join('')}</div></section>`:''}<button class="primary" data-action="add-from-detail" data-id="${id}">添加到${i.type==='基础装备'?'已有散件':'已有成装'}</button><p><a class="source-link" href="${esc(state.data.sources.find(s=>s.id===i.source_id)?.url||'#')}" target="_blank" rel="noopener">查看官网装备资料 ↗</a></p></div>`);
+}
+function stepItem(direction){const ids=state.itemBrowse;if(!ids?.length)return;showItem(ids[(ids.indexOf(state.itemId)+direction+ids.length)%ids.length]);$('#modal').scrollTop=0;}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b||!state.reference)return;if(b.dataset.action==='item-tag'){const t=b.dataset.tag;state.itemTags.has(t)?state.itemTags.delete(t):state.itemTags.add(t);renderItems();}if(b.dataset.action==='clear-item-filters'){state.itemTags.clear();$('#item-search').value='';$('#item-type').value='';$('#craftable-only').checked=false;renderItems();}if(b.dataset.action==='item-step')stepItem(Number(b.dataset.direction));});
+let studyTouch=null;
+document.addEventListener('touchstart',e=>{const area=e.target.closest('#hero-detail,#item-study');if(!area||e.target.closest('button,a,input,select,textarea')||e.touches.length!==1){studyTouch=null;return;}studyTouch={x:e.touches[0].clientX,y:e.touches[0].clientY,area};},{passive:true});
+document.addEventListener('touchend',e=>{if(!studyTouch)return;const {x,y,area}=studyTouch;studyTouch=null;const t=e.changedTouches[0],dx=t.clientX-x,dy=t.clientY-y;if(Math.abs(dx)<65||Math.abs(dx)<Math.abs(dy)*1.6||!area.isConnected)return;area.id==='hero-detail'?stepHero(dx<0?1:-1):stepItem(dx<0?1:-1);},{passive:true});
+document.addEventListener('touchcancel',()=>{studyTouch=null;},{passive:true});

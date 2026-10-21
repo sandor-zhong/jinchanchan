@@ -1,0 +1,24 @@
+# Python 环境与缓存
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# 本地配置和密钥
+.env
+.env.*
+!.env.example
+auth.json
+
+# 运行数据
+*.db
+*.db-wal
+*.db-shm
+*.sqlite
+*.sqlite3
+logs/
+*.log
+
+# 编辑器配置
+.idea/
+.vscode/

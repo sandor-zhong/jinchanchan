@@ -1,0 +1,17 @@
+services:
+  app:
+    build: .
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    environment:
+      PORT: "8000"
+      WEB_CONCURRENCY: "${WEB_CONCURRENCY:-2}"
+      CORS_ORIGINS: "${CORS_ORIGINS:-}"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

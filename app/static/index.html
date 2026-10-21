@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#122725">
+  <meta name="description" content="画之灵学习手册：逐个理解棋子属性、技能和出装，查阅阵容适用条件、运营与海克斯搭配。">
+  <link rel="manifest" href="/static/manifest.webmanifest">
+  <link rel="icon" href="/static/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/static/icon.svg">
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/reference.css">
+  <title>弈墨 · 画之灵助手</title>
+  <script src="/static/app.js" defer></script>
+  <script src="/static/reference.js" defer></script>
+</head>
+<body>
+  <header class="header">
+    <a href="#handbook" class="brand" aria-label="弈墨首页"><span class="brand-mark">弈</span><span>弈墨<small>画之灵助手</small></span></a>
+    <nav class="navigation" aria-label="主导航">
+      <button class="nav-button active" data-view="handbook"><span>◈</span> 阵容手册</button>
+      <button class="nav-button" data-view="heroes"><span>♙</span> 棋子图鉴</button>
+      <button class="nav-button" data-view="augments"><span>✧</span> 海克斯</button>
+      <button class="nav-button" data-view="items"><span>◇</span> 装备工坊</button>
+      <button class="nav-button" data-action="reference-more"><span>▤</span> 更多资料</button>
+    </nav>
+    <span class="header-status"><i></i> 官网资料快照</span>
+  </header>
+
+  <main id="main-content">
+    <div id="connection-status" class="connection-status" role="status" hidden></div>
+    <section class="hero-banner" id="hero-banner">
+      <div class="hero-copy"><span class="eyebrow">LEARN THE PIECES / LEARN THE GAME</span><h1>先懂棋子，<br>再懂成阵<span>。</span></h1><p>读懂技能与装备，理解选阵与运营。<br class="mobile-break">一份随时翻阅的画之灵学习手册。</p><div class="hero-meta"><span class="season-pill">画之灵 · 限时返场</span><span id="data-version">正在载入官网资料…</span></div></div>
+      <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><span class="art-word">灵</span><div class="mountain mountain-one"></div><div class="mountain mountain-two"></div><span class="art-seal">落笔<br>绘阵</span><div class="art-caption">一局一境 · 落子成画</div></div>
+    </section>
+
+    <div id="loading" class="loading" role="status"><span class="spinner"></span> 正在展开画卷…</div>
+    <div id="fatal-error" class="empty-state" hidden><h2>资料暂时无法载入</h2><p id="fatal-message"></p><button class="primary" data-action="reload">重新加载</button></div>
+
+    <section id="view-handbook" class="view" hidden>
+      <div class="section-heading"><div><span class="eyebrow">COMPOSITION PLAYBOOK</span><h2>知其阵，也知其所以然</h2><p class="muted">什么时候选、怎么过渡、装备先给谁、海克斯为什么适配。</p></div><button class="outline-button" data-action="fundamentals">运营判断速查 ↗</button></div>
+      <div class="study-tip">不用同步实时对局。先按想学的阵容翻阅，适用条件与运营窗口都是学习参考。</div>
+      <div class="filter-bar"><input id="book-search" type="search" placeholder="搜索阵容、棋子或羁绊" aria-label="搜索阵容手册"><select id="book-style" aria-label="手册打法筛选"><option value="">全部路线</option><option value="reroll">低费追星</option><option value="level">高费运营</option><option value="special">专属强化</option></select><select id="book-augment" aria-label="按海克斯查阵容"><option value="">按海克斯查阵容</option></select></div>
+      <p id="book-count" class="list-count"></p><div id="book-grid" class="book-grid"></div>
+    </section>
+
+    <section id="view-recommend" class="view" hidden>
+      <div class="workspace">
+        <aside class="conditions-panel">
+          <div class="panel-heading"><div><span class="eyebrow">YOUR GAME</span><h2>这一局的条件</h2></div><button class="text-button" data-action="reset">重置</button></div>
+          <form id="recommend-form">
+            <label class="field-label" for="portal">城邦 / 开局奇遇 <span>01</span></label>
+            <select id="portal"><option value="">暂未选择</option></select><p id="portal-description" class="field-help">选择对局中的城邦或开局奇遇。</p>
+            <div class="field-label">强化符文 <span id="augment-count">0 / 3</span></div>
+            <div id="selected-augments" class="selected-list"></div>
+            <button type="button" class="add-button" data-action="pick-augments">＋ 选择海克斯</button>
+            <div class="field-label">当前来牌 <span>02</span></div>
+            <div id="selected-heroes" class="selected-list"></div>
+            <button type="button" class="add-button" data-action="pick-heroes">＋ 添加英雄</button>
+            <p class="field-help">填写总张数：两星 = 3 张，三星 = 9 张。</p>
+            <div class="field-label">已有散件 <span>03</span></div>
+            <div id="component-picker" class="component-picker"></div>
+            <div id="selected-components" class="selected-list compact"></div>
+            <button type="button" class="text-button owned-button" data-action="pick-owned">＋ 添加已有成装 / 纹章</button>
+            <div id="selected-owned" class="selected-list compact"></div>
+            <details class="advanced"><summary>更多对局条件 <span>等级 · 血量 · 同行</span></summary>
+              <div class="number-grid"><label>等级<input id="player-level" type="number" value="7" min="3" max="10" required></label><label>血量<input id="player-hp" type="number" value="80" min="1" max="115" required></label><label>金币<input id="player-gold" type="number" value="50" min="0" max="999" required></label></div>
+              <label class="field-label" for="style">打法偏好</label><select id="style"><option value="auto">顺势而为</option><option value="reroll">追三星 / 慢 D</option><option value="level">运营 / 升人口</option></select>
+              <div class="field-label">同行主 C</div><div id="selected-contested" class="selected-list compact"></div><button type="button" class="add-button" data-action="pick-contested">＋ 标记有同行的英雄</button>
+            </details>
+            <button type="submit" class="primary recommend-button" id="recommend-button">为我推荐 <span>↗</span></button>
+          </form>
+          <p class="panel-footnote">条件仅保存在此浏览器。匹配分综合来牌、装备和符文，不代表胜率。</p>
+        </aside>
+        <div class="results-panel">
+          <div class="section-heading"><div><span class="eyebrow">FIND YOUR COMPOSITION</span><h2>顺势，成阵<span id="result-count"></span></h2></div><button id="favorites-toggle" class="outline-button" data-action="toggle-favorites" aria-pressed="false">☆ 我的收藏</button></div>
+          <div id="result-notes" class="result-notes"></div>
+          <div class="filter-bar"><input id="lineup-search" type="search" placeholder="搜索阵容、主 C 或羁绊" aria-label="搜索阵容"><select id="lineup-scope" aria-label="阵容展示范围"><option value="recommend">当前推荐</option><option value="all">全部官网阵容</option></select></div>
+          <div id="results" class="lineup-list" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-heroes" class="view" hidden>
+      <div class="section-heading"><div><span class="eyebrow">CHAMPION STUDY</span><h2>逐个了解，每个弈子</h2><p class="muted">固定详情区域，快速切换；同星级看属性、技能与出装逻辑。</p></div><button class="outline-button" data-action="toggle-hero-table">属性总表 ⇄</button></div>
+      <div class="filter-bar"><input id="hero-search" type="search" placeholder="搜索英雄或羁绊，如：巴德、山海" aria-label="搜索英雄或羁绊"><select id="hero-cost" aria-label="按费用筛选"><option value="">全部费用</option><option value="1">1 费</option><option value="2">2 费</option><option value="3">3 费</option><option value="4">4 费</option><option value="5">5 费</option><option value="0">召唤物</option></select><select id="hero-trait" aria-label="按羁绊筛选"><option value="">全部羁绊</option></select><select id="study-star" aria-label="图鉴统一星级"><option value="1">1 星</option><option value="2">2 星</option><option value="3">3 星</option></select></div>
+      <div id="hero-study-layout" class="hero-study-layout"><aside class="hero-index"><div class="index-heading"><span id="hero-list-count"></span><small>可用 ← → 切换</small></div><div id="hero-list" role="listbox" aria-label="棋子快速切换列表"></div></aside><article id="hero-detail" class="hero-study-detail" aria-live="polite"></article></div>
+      <div id="hero-table-panel" class="attribute-table-wrap" hidden></div>
+    </section>
+
+    <section id="view-augments" class="view" hidden>
+      <div class="section-heading"><div><span class="eyebrow">AUGMENT LIBRARY</span><h2>符文与阵容，双向查阅</h2><p class="muted">先看效果与触发条件，再看适配理由。官网优选、备选与机制分析分别标注。</p></div></div>
+      <div class="filter-bar"><input id="augment-search" type="search" placeholder="搜索海克斯名称或效果" aria-label="搜索海克斯图鉴"><select id="augment-tier-filter" aria-label="海克斯品阶"><option value="">全部品阶</option><option value="1">白银</option><option value="2">黄金</option><option value="3">棱彩</option></select><select id="augment-category" aria-label="海克斯类型"><option value="">全部类型</option></select><select id="augment-lineup" aria-label="按阵容查海克斯"><option value="">按阵容查海克斯</option></select></div>
+      <p id="augment-list-count" class="list-count"></p><div id="augment-grid" class="augment-grid"></div><button id="augment-more" class="add-button load-more" data-action="more-augments">继续展开</button>
+    </section>
+
+    <section id="view-rankings" class="view" hidden>
+      <div class="section-heading"><div><span class="eyebrow">STATISTICS & CONTEXT</span><h2>数据有口径，选择有依据</h2><p class="muted">先确认赛季、版本、分段和样本量，再比较前四率、登顶率与平均名次。</p></div></div>
+      <div class="filter-bar"><select id="ranking-metric" aria-label="排行榜指标"><option value="top4_rate">前四率</option><option value="first_rate">登顶率</option><option value="average_placement">平均名次</option></select><select id="ranking-min-samples" aria-label="最低样本量"><option value="30">至少30个样本</option><option value="100">至少100个样本</option><option value="500">至少500个样本</option></select></div><div id="ranking-content"></div>
+    </section>
+
+    <section id="view-items" class="view" hidden>
+      <div class="section-heading"><div><span class="eyebrow">ITEM WORKSHOP</span><h2>好器，成就好棋</h2><p class="muted">查看合成路径与装备效果，也可筛选现有散件能合成的装备。</p></div></div>
+      <div class="filter-bar"><input id="item-search" type="search" placeholder="搜索装备或效果，如：羊刀、护盾" aria-label="搜索装备"><select id="item-type" aria-label="装备类别"><option value="">全部可见装备</option></select><label class="check-label"><input id="craftable-only" type="checkbox">仅看已有散件可合成</label></div>
+      <div id="item-grid" class="item-grid"></div>
+    </section>
+
+    <section id="view-sources" class="view" hidden>
+      <div class="section-heading"><div><span class="eyebrow">SEASON & SOURCES</span><h2>画卷，有据可循</h2><p class="muted">每一条资料都有出处，每一次推荐都说明依据。</p></div><a class="outline-button" href="/docs" target="_blank" rel="noopener">API 文档 ↗</a></div>
+      <div id="source-content"></div>
+    </section>
+  </main>
+  <footer class="footer"><span>弈墨 <b>·</b> 落子成画</span><span>基于官网公开资料制作的独立工具</span></footer>
+  <dialog id="modal" aria-labelledby="modal-title"><div class="dialog-header"><h2 id="modal-title"></h2><button class="icon-button" data-action="close-modal" aria-label="关闭弹窗">×</button></div><div id="modal-body"></div></dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+</body>
+</html>

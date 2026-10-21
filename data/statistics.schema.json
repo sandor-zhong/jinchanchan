@@ -1,0 +1,103 @@
+{
+  "$defs": {
+    "LineupSample": {
+      "additionalProperties": false,
+      "properties": {
+        "lineup_id": {
+          "title": "Lineup Id",
+          "type": "string"
+        },
+        "placement_counts": {
+          "items": {
+            "type": "integer"
+          },
+          "maxItems": 8,
+          "minItems": 8,
+          "title": "Placement Counts",
+          "type": "array"
+        }
+      },
+      "required": [
+        "lineup_id",
+        "placement_counts"
+      ],
+      "title": "LineupSample",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "season": {
+      "const": "S100030",
+      "title": "Season",
+      "type": "string"
+    },
+    "data_version": {
+      "title": "Data Version",
+      "type": "string"
+    },
+    "source_name": {
+      "maxLength": 100,
+      "minLength": 2,
+      "title": "Source Name",
+      "type": "string"
+    },
+    "source_url": {
+      "format": "uri",
+      "maxLength": 2083,
+      "minLength": 1,
+      "title": "Source Url",
+      "type": "string"
+    },
+    "region": {
+      "const": "CN",
+      "title": "Region",
+      "type": "string"
+    },
+    "rank_scope": {
+      "maxLength": 100,
+      "minLength": 1,
+      "title": "Rank Scope",
+      "type": "string"
+    },
+    "lineup_definition": {
+      "maxLength": 1000,
+      "minLength": 10,
+      "title": "Lineup Definition",
+      "type": "string"
+    },
+    "period_start": {
+      "format": "date-time",
+      "title": "Period Start",
+      "type": "string"
+    },
+    "period_end": {
+      "format": "date-time",
+      "title": "Period End",
+      "type": "string"
+    },
+    "samples": {
+      "items": {
+        "$ref": "#/$defs/LineupSample"
+      },
+      "maxItems": 100,
+      "minItems": 1,
+      "title": "Samples",
+      "type": "array"
+    }
+  },
+  "required": [
+    "season",
+    "data_version",
+    "source_name",
+    "source_url",
+    "region",
+    "rank_scope",
+    "lineup_definition",
+    "period_start",
+    "period_end",
+    "samples"
+  ],
+  "title": "StatisticsSnapshot",
+  "type": "object"
+}

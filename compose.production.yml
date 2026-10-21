@@ -1,0 +1,35 @@
+services:
+  app:
+    build: .
+    expose:
+      - "8000"
+    environment:
+      PORT: "8000"
+      WEB_CONCURRENCY: "${WEB_CONCURRENCY:-2}"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+  caddy:
+    image: caddy:2-alpine
+    environment:
+      APP_DOMAIN: "${APP_DOMAIN:?请在 .env 中设置真实域名 APP_DOMAIN}"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+volumes:
+  caddy_data:
+  caddy_config:
